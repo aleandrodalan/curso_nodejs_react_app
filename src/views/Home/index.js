@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 
 import styles from './styles';
 
@@ -16,17 +16,20 @@ export default function Home() {
 
     const [filter, setFilter] = useState('today');
     const [tasks, setTasks] = useState([]);
+    const [load, setLoad] = useState(false);
 
     async function loadTasks() {
-        await api.get('/task/filter/all/11:11:11:11:11:11')
+        setLoad(true);
+        await api.get(`/task/filter/${filter}/11:11:11:11:11:11`)
                  .then(response => {
-                    setTasks(response.data);
+                    setTasks(response.data)
+                    setLoad(false);
                  });
     }
 
     useEffect(() => {
         loadTasks();
-    });
+    }, [filter]);
 
     return(
         <View style={styles.container}>
@@ -59,11 +62,15 @@ export default function Home() {
             </View>
 
             <ScrollView style={styles.content} contentContainerStyle={{alignItems: 'center'}}>
-                {
-                    tasks.map(t => (
-                        <TaskCard done={false} />
-                    ))
-                }
+                    {
+                        load 
+                        ? 
+                        <ActivityIndicator color={'#EE6B26'} size={50} /> 
+                        :                        
+                        tasks.map(t => (
+                            <TaskCard done={false} title={t.title} when={t.when} type={t.type} />
+                        ))
+                    }
             </ScrollView>
 
             <Footer icon={'add'} />
