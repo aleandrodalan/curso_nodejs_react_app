@@ -44,7 +44,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 10
+        padding: 10,
+        marginBottom: 50
     },
     inputInLine: {
         flexDirection: 'row',
@@ -63,6 +64,9 @@ const styles = StyleSheet.create({
         color: '#20295F',
         textTransform: 'uppercase',
         fontSize: 16
+    },
+    typeIconInactive: {
+        opacity: 0.5
     }
 });
 

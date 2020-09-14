@@ -7,28 +7,59 @@ import {
     TextInput,
     TouchableOpacity,
     KeyboardAvoidingView,
-    Switch
+    Switch,
+    Alert
 } from 'react-native';
 
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import styles from '../Task/style';
+import DateTimeInput from '../../components/DateTimeInput';
 
 import typeIcons from '../../utils/typeIcons';
 
-export default function Task() {
+import api from '../../services/api';
+
+export default function Task({navigation}) {
     const [done, setDone] = useState(false);
+    const [type, setType] = useState();
+    const [title, setTitle] = useState();
+    const [description, setDescription] = useState();
+    const [date, setDate] = useState();
+    const [hour, setHour] = useState();
+    const [macaddress, setMacaddress] = useState('11:11:11:11:11:11');
+
+    async function SaveTask() {
+        if (!title)
+            return Alert.alert('Defina o nome do título da tarefa!');
+
+        if (!description)
+            return Alert.alert('Defina os detalhes da tarefa!');
+
+        if (!type)
+            return Alert.alert('Defina o tipo da tarefa!');     
+            
+        await api.post('/task', {
+            macaddress,
+            type,
+            title,
+            description,
+            when: `${date}T${hour}.000`    
+        }).then(() => {
+            navigation.navigate('Home');
+        });
+    }
 
     return (
         <KeyboardAvoidingView behavior='padding' style={styles.container}>
-            <Header showBack={true} />
+            <Header showBack={true} navigation={navigation} />
             <ScrollView style={{width: '100%'}}>
                 <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{marginVertical: 10}}>
                     {
-                        typeIcons.map(icon => 
+                        typeIcons.map((icon, index) => 
                             icon != null &&
-                            <TouchableOpacity>                                
-                                <Image source={icon} style={styles.imageIcon} />
+                            <TouchableOpacity onPress={() => setType(index)}>
+                                <Image source={icon} style={[styles.imageIcon, type && type != index && styles.typeIconInactive]} />
                             </TouchableOpacity>
                         )
                     }
@@ -38,7 +69,9 @@ export default function Task() {
                 <TextInput 
                     style={styles.input} 
                     maxLength={30} 
-                    placeholder='Lembre-me de fazer...' 
+                    placeholder='Lembre-me de fazer...'
+                    onChange={(text) => setTitle(text)} 
+                    value={title}
                 />
 
                 <Text style={styles.label}>Detalhes</Text>
@@ -47,7 +80,12 @@ export default function Task() {
                     maxLength={200} 
                     multiline={true}
                     placeholder='Detalhes da atividade que eu tenho que lembrar...' 
+                    onChange={(text) => setDescription(text)} 
+                    value={description}                    
                 />
+
+                <DateTimeInput type={'date'} save={setDate} date={date} />
+                <DateTimeInput type={'hour'} save={setHour} hour={hour} />                
 
                 <View style={styles.inLine}>
                     <View style={styles.inputInLine}>
@@ -59,7 +97,7 @@ export default function Task() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-            <Footer />           
+            <Footer onPress={SaveTask} />
         </KeyboardAvoidingView>
     )
 }
